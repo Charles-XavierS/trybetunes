@@ -1,7 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
+
+import searchAlbumsAPI from '../services/searchAlbumsAPI';
 
 import Header from '../components/Header';
+import Loading from '../components/Loading';
 
 class Search extends React.Component {
   constructor() {
@@ -9,6 +12,9 @@ class Search extends React.Component {
     this.state = {
       searchArtist: '',
       disabled: true,
+      loading: false,
+      albuns: [],
+      searched: '',
     };
   }
 
@@ -29,8 +35,24 @@ class Search extends React.Component {
     });
   }
 
+  handleClick = async () => {
+    this.setState({
+      loading: true,
+    });
+    const { searchArtist } = this.state;
+    const result = await searchAlbumsAPI(searchArtist);
+    console.log(result);
+    this.setState({
+      searched: searchArtist,
+      searchArtist: '',
+      disabled: true,
+      albuns: result,
+      loading: false,
+    });
+  }
+
   render() {
-    const { searchArtist, disabled } = this.state;
+    const { searchArtist, disabled, loading, searched, albuns } = this.state;
     return (
       <div data-testid="page-search">
         <Header />
@@ -47,19 +69,45 @@ class Search extends React.Component {
             data-testid="search-artist-button"
             type="button"
             disabled={ disabled }
+            onClick={ this.handleClick }
           >
             Entrar
           </button>
         </form>
+        {loading && <Loading />}
+        {!loading && albuns.length === 0 && (
+          <h2>Nenhum álbum foi encontrado</h2>
+        )}
+        {!loading
+          && albuns.length !== 0
+            && (
+              <section>
+                <h3>
+                  {`Resultado de álbuns de: ${searched}`}
+                </h3>
+                <div>
+                  {albuns.map((album) => (
+                    <div key={ album.collectionId }>
+                      <Link
+                        to={ `/album/${album.collectionId}` }
+                        data-testid={ `link-to-album-${album.collectionId}` }
+                      >
+                        <img
+                          src={ album.artworkUrl100 }
+                          alt={ `${album.collectionName} - ${album.artistName}` }
+                        />
+                        <p>{album.collectionName}</p>
+                        <p>{album.artistName}</p>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
       </div>
     );
   }
 }
-
-Search.propTypes = {
-  searchArtist: PropTypes.string,
-  disabled: PropTypes.bool,
-  handleChange: PropTypes.func,
-}.isRequired;
 
 export default Search;
