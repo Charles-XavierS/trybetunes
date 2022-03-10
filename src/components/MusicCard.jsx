@@ -1,27 +1,74 @@
 import React from 'react';
-import propTypes from 'prop-types';
+import PropTypes from 'prop-types';
+
+import { addSong } from '../services/favoriteSongsAPI';
+
+import Loading from './Loading';
 
 class MusicCard extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false,
+    };
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick(music) {
+    this.setState({
+      loading: true,
+    }, (async () => {
+      await addSong(music);
+      this.setState({
+        loading: false,
+      });
+    }
+    ));
+  }
+
   render() {
-    const { song } = this.props;
+    const { music: { previewUrl, trackName, trackId }, song, checked } = this.props;
+    const { loading } = this.state;
     return (
-      <div>
-        <p>{song.trackName}</p>
-        <audio data-testid="audio-component" src={ song.previewUrl } controls>
-          <track kind="captions" />
-          O seu navegador não suporta o elemento
-          <code>audio</code>
-        </audio>
+
+      <div className="music-list">
+
+        <p>{ trackName }</p>
+
+        { loading ? <Loading /> : (
+          <audio data-testid="audio-component" src={ previewUrl } controls>
+            <track kind="captions" />
+            O seu navegador não suporta o elemento
+            <code>audio</code>
+          </audio>
+        )}
+
+        <label htmlFor="favorite">
+          Favorita
+
+          <input
+            id="favorite"
+            data-testid={ `checkbox-music-${trackId}` }
+            type="checkbox"
+            onClick={ () => this.handleClick(song) }
+            defaultChecked={ checked }
+            name="favorite"
+          />
+
+        </label>
+
       </div>
     );
   }
 }
 
 MusicCard.propTypes = {
-  song: propTypes.shape({
-    trackName: propTypes.string,
-    previewUrl: propTypes.string,
+  music: PropTypes.shape({
+    previewUrl: PropTypes.string,
+    trackName: PropTypes.string,
+    trackId: PropTypes.number,
   }),
+  checked: PropTypes.bool,
 }.isRequired;
 
 export default MusicCard;

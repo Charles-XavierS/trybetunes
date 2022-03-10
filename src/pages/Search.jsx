@@ -55,8 +55,11 @@ class Search extends React.Component {
     const { searchArtist, disabled, loading, searched, albuns } = this.state;
     return (
       <div data-testid="page-search">
+
         <Header />
+
         <form>
+
           <input
             type="text"
             name="searchArtist"
@@ -65,15 +68,18 @@ class Search extends React.Component {
             onChange={ this.handleChange }
             value={ searchArtist }
           />
+
           <button
             data-testid="search-artist-button"
             type="button"
             disabled={ disabled }
             onClick={ this.handleClick }
           >
-            Entrar
+            Pesquisar
           </button>
+
         </form>
+
         {loading && <Loading />}
         {!loading && albuns.length === 0 && (
           <h2>Nenhum álbum foi encontrado</h2>
@@ -82,9 +88,11 @@ class Search extends React.Component {
           && albuns.length !== 0
             && (
               <section>
+
                 <h3>
                   {`Resultado de álbuns de: ${searched}`}
                 </h3>
+
                 <div>
                   {albuns.map((album) => (
                     <div key={ album.collectionId }>
@@ -99,9 +107,13 @@ class Search extends React.Component {
                         <p>{album.collectionName}</p>
                         <p>{album.artistName}</p>
                       </Link>
+
                     </div>
+
                   ))}
+
                 </div>
+
               </section>
             )}
 
